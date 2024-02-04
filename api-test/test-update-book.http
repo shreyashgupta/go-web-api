@@ -1,0 +1,8 @@
+PUT http://localhost:3000/update_book/1
+content-type: application/json
+
+{
+    "Name": "Wings of Fire (Discounted Price)",
+    "Author": "APJ Abdul Kalam",
+    "Price": 99
+}

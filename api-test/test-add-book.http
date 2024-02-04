@@ -2,7 +2,7 @@ POST http://localhost:3000/add_book
 content-type: application/json
 
 {
-    "Name": "Wings of Fire",
-    "Author": "APJ Abdul Kalam",
+    "Name": "Test Book 3",
+    "Author": "Shreyash",
     "Price": 199
 }

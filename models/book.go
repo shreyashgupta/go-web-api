@@ -66,3 +66,38 @@ func GetBookWithId(id int64) (*Book, error) {
 	}
 	return &book, nil
 }
+
+func UpdateBook(book *Book) error {
+	query := `
+	UPDATE books
+	SET name = ?, author = ?, price = ?
+	WHERE id = ?
+	`
+	stmt, err := db.DB.Prepare(query)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+	_, err = stmt.Exec(book.Name, book.Author, book.Price, book.Id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func DeleteBook(id int64) error {
+	query := `
+	DELETE FROM books
+	WHERE id = ?
+	`
+	stmt, err := db.DB.Prepare(query)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+	_, err = stmt.Exec(id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
