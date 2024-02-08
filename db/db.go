@@ -17,7 +17,7 @@ func InitDB() {
 	}
 
 	DB = db
-
+	DB.Exec("PRAGMA foreign_keys = ON;")
 	err = createTables()
 	if err != nil {
 		panic("Database could not connect: " + err.Error())
@@ -31,13 +31,26 @@ func createTables() error {
 	createBooksTable := `
         CREATE TABLE IF NOT EXISTS books (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            author TEXT NOT NULL,
+            name TEXT NOT NULL UNIQUE,
             price INTEGER NOT NULL,
-            publishDate DATETIME NOT NULL
+            publishDate DATETIME NOT NULL,
+			author_id INTEGER,
+			FOREIGN KEY(author_id) REFERENCES authors(id)
         )
     `
 
+	createAuthorsTable := `
+	CREATE TABLE IF NOT EXISTS authors (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		name TEXT NOT NULL,
+		email TEXT NOT NULL UNIQUE,
+		password TEXT NOT NULL
+	)
+`
 	_, err := DB.Exec(createBooksTable)
+	if err != nil {
+		return err
+	}
+	_, err = DB.Exec(createAuthorsTable)
 	return err
 }

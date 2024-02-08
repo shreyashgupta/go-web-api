@@ -3,6 +3,6 @@ content-type: application/json
 
 {
     "Name": "Test Book 3",
-    "Author": "Shreyash",
+    "AuthorId": 1,
     "Price": 199
 }
