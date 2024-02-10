@@ -7,16 +7,21 @@ import (
 	"time"
 
 	"example.com/go_api/models"
+	"example.com/go_api/utils"
 	"github.com/gin-gonic/gin"
 )
 
 func SetupRoutes(server *gin.Engine) error {
 
+	authRoutes := server.Group("/")
+	authRoutes.Use(authenticate)
+
+	authRoutes.PUT("/update_book/:id", updateBook)
+	authRoutes.DELETE("/delete_book/:id", deleteBook)
+	authRoutes.POST("/add_book", addBook)
+
 	server.GET("/books", getBooks)
-	server.POST("/add_book", addBook)
 	server.GET("/books/:id", getBook)
-	server.PUT("/update_book/:id", updateBook)
-	server.DELETE("/delete_book/:id", deleteBook)
 	server.POST("/signup", addAuthor)
 	server.POST("/signin", signIn)
 
@@ -24,10 +29,26 @@ func SetupRoutes(server *gin.Engine) error {
 	return err
 }
 
+func authenticate(context *gin.Context) {
+	token := context.Request.Header.Get("token")
+	if token == "" {
+		context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Not Unauthorized"})
+	}
+
+	id, err := utils.VerifyToken(token)
+
+	if err != nil {
+		context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Not Unauthorized: " + err.Error()})
+	}
+	context.Set("authorId", id)
+	context.Next()
+}
+
 func getBooks(context *gin.Context) {
 	books, err := models.GetAllBooks()
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to get books"})
+		return
 	}
 	context.JSON(http.StatusOK, gin.H{"books": books})
 }
@@ -64,8 +85,9 @@ func getBook(context *gin.Context) {
 }
 
 func updateBook(context *gin.Context) {
-	var book models.Book
-	err := context.ShouldBindJSON(&book)
+	authorId := context.GetInt64("authorId")
+	var updatedBook *models.Book
+	err := context.ShouldBindJSON(&updatedBook)
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
@@ -76,15 +98,19 @@ func updateBook(context *gin.Context) {
 		context.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-
-	_, err = models.GetBookWithId(id)
+	book, err := models.GetBookWithId(id)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"message": "No event with specidied id exists"})
 		return
 	}
-
+	if authorId != book.AuthorId {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Not authorized to update"})
+		return
+	}
 	book.Id = id
-	err = models.UpdateBook(&book)
+	book.Name = updatedBook.Name
+	book.Price = updatedBook.Price
+	err = models.UpdateBook(book)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
@@ -94,11 +120,23 @@ func updateBook(context *gin.Context) {
 }
 
 func deleteBook(context *gin.Context) {
+	authorId := context.GetInt64("authorId")
 	id, err := strconv.ParseInt(context.Param("id"), 10, 64)
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
+	book, err := models.GetBookWithId(id)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	if authorId != book.AuthorId {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Not authorized to delete"})
+		return
+	}
+
 	err = models.DeleteBook(id)
 
 	if err != nil {
@@ -130,10 +168,18 @@ func signIn(context *gin.Context) {
 		context.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
+
 	err = models.ValidateAuthor(&author)
 	if err != nil {
 		context.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
 		return
 	}
-	context.JSON(http.StatusOK, gin.H{"message": "SignIn successful"})
+
+	token, err := utils.GenerateJWTAuthToken(author.Id, author.Email)
+
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{"message": "SignIn successful", "token": token})
 }

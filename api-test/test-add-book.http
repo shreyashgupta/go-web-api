@@ -1,8 +1,9 @@
 POST http://localhost:3000/add_book
 content-type: application/json
+token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAZ21haWwuY29tIiwiZXhwIjoxNzA3NTcxNTM4LCJpZCI6Mn0.K9U11oOmWhseBhvH8HUh1Bd8rfOiLsvjVrSTuuTrP5c
 
 {
-    "Name": "Test Book 3",
-    "AuthorId": 1,
+    "Name": "Test Book 6",
+    "AuthorId": 2,
     "Price": 199
 }

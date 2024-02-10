@@ -9,8 +9,8 @@ import (
 type Book struct {
 	Id          int64
 	Name        string `binding:"required"`
-	AuthorId    int64  `binding:"required"`
-	Price       int    `binding:"required"`
+	AuthorId    int64
+	Price       int `binding:"required"`
 	PublishDate time.Time
 }
 
@@ -78,7 +78,7 @@ func UpdateBook(book *Book) error {
 		return err
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(book.Name, book.Price, book.Id, book.AuthorId)
+	_, err = stmt.Exec(book.Name, book.AuthorId, book.Price, book.Id)
 	if err != nil {
 		return err
 	}

@@ -1,8 +1,9 @@
-PUT http://localhost:3000/update_book/1
+PUT http://localhost:3000/update_book/3
 content-type: application/json
+token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InNocmV5YXNoQGdtYWlsLmNvbSIsImV4cCI6MTcwNzU4ODQ3MCwiaWQiOjF9.HI1IwXiGXFKufwkgBSrecV3suRQDMYRG4EhqrFEMLPE
 
 {
-    "Name": "Wings of Fire (Discounted Price)",
-    "Author": "APJ Abdul Kalam",
-    "Price": 99
+    "Name": "Test (Discounted Price)",
+    "Id": 3,
+    "Price": 79
 }

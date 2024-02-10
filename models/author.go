@@ -52,39 +52,6 @@ func ValidateAuthor(author *Author) error {
 	if !isPasswordValid {
 		return errors.New("invalid password")
 	}
-
+	author.Id = queriedAuthor.Id
 	return nil
 }
-
-// func GetAllAuthors() ([]User, error) {
-// 	users := []User{}
-// 	getAllUsers := `
-// 	SELECT * FROM users;
-// 	`
-// 	rows, err := db.DB.Query(getAllUsers)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	defer rows.Close()
-// 	for rows.Next() {
-// 		var user User
-// 		err := rows.Scan(&user.Id, &user.Name, &user.Email, &user.Password)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 		users = append(users, user)
-// 	}
-// 	return users, err
-// }
-
-// func GetUserWithId(id int64) (*User, error) {
-// 	query := `SELECT * from users where id = (?)`
-// 	rows := db.DB.QueryRow(query, id)
-// 	user := User{}
-
-// 	err := rows.Scan(&user.Id, &user.Name, &user.Email, &user.Password)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return &user, nil
-// }
